@@ -1,0 +1,28 @@
+若不想使用编译器自动生成的函数，就该明确拒绝
+
+对于一个类，编译器会自动生成拷贝构造函数和赋值运算符，若不想该类的对象被复制，应该阻止这两种方法的调用。应自行进行private声明。
+
+class A {
+public:
+	...
+private:
+	A(const A&);
+	A& operator=(const A&);
+}
+
+声明为private,编译器不会自己生成默认版本，对外也阻止了其他人调用他们。也可以通过继承：
+
+class Uncopyable {
+protected:
+	Uncopyable();
+	~Uncopyable();
+private:
+	Uncopyable(const Uncopyable&);
+	Uncopyable &operator=(const Uncopyable&);
+}
+
+class A: private Uncopyable {
+	...
+}
+
+任何人想要拷贝A对象，编译器会自动生成对应的拷贝构造函数和赋值运算符，这二者会自动调用基类（Uncopyable）的拷贝构造函数和赋值运算符，但由于是private，因此会报错。
