@@ -1,0 +1,23 @@
+在operator= 中处理“自我赋值”
+
+widget & operator= (const widget &w) {
+	if (this == &w)
+		return *this;
+	delete pb;
+	pb = new Bitmap(*w.pb);
+	return *this;
+}
+
+该方法虽处理自我赋值，但如果pb = new Bitmap(*w.pb)发生异常，widget的pb会指向一块已经被删除的内存。
+
+widget & operator= (const widget &w) {
+	if (this != &w) {
+		widget temp(w);
+		Bitmap *t = temp.pb;
+		temp.pb = pb;
+		pb = t;
+	}
+	return *this;
+}
+
+我们创建了一个临时实例temp，用temp内的pb指针指向原来widget内pb所指向的内存，当if结束时，temp的析构函数被调用，内存被删除。相当于使用了delete pb。同时，如果temp创建发生异常，那么原pb也不会被改动。
